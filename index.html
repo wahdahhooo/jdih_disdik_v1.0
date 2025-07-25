@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JDIH Disdikbud Kab. Tasikmalaya</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top blur-navbar">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <img src="img/WhatsApp_Image_2025-07-15_at_12.32.02-removebg-preview.png" alt="Logo Disdik" width="100" height="60" />
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="#filter">Filter</a></li>
+          <li class="nav-item"><a class="nav-link" href="#dokumen">Dokumen</a></li>
+          <li class="nav-item"><a class="nav-link" href="#kontak">Kontak</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>    
+  <section class="hero-image text-white text-center">
+    <div class="container">
+      <h1 class="fs-4 fw-normal">Jaringan Dokumentasi dan Informasi Hukum</h1>
+      <p class="display-5 fw-bold">Dinas Pendidikan dan Kebudayaan</p>
+      <p class="display-5 fw-bold">Kabupaten Tasikmalaya</p>
+    </div>
+  </section>   
+  <section id="filter" class="py-4 bg-light">
+    <div class="container">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+          <input type="text" id="searchInput" class="form-control" placeholder="Cari dokumen..." />
+        </div>
+        <div class="col-md-4">
+          <select id="filterJenis" class="form-select">
+            <option value="">Semua Jenis</option>
+            <option>Undang-Undang</option>
+            <option>PP</option>
+            <option>PERPU</option>
+            <option>PERPRES</option>
+            <option>PERMEN</option>
+            <option>PERGUB</option>
+            <option>PERDA</option>
+            <option>KEPBUP</option>
+            <option>Edaran</option>
+            <option>Lainnya</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <select id="filterTahun" class="form-select">
+            <option value="">Semua Tahun</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>  
+  <section id="dokumen" class="py-5">
+    <div class="container">
+      <h2 class="mb-4">Daftar Dokumen</h2>
+      <div class="dokumen-wrapper p-3 rounded dokumen-card">
+        <div id="dokumenContainer">
+        </div>
+      </div>
+      <div class="pagination justify-content-center mt-4" style="gap: 10px;">
+        <button id="prevBtn" class="btn btn-custom-blue btn-sm">Sebelumnya</button>
+        <span id="pageInfo" class="align-self-center"></span>
+        <button id="nextBtn" class="btn btn-custom-blue btn-sm">Berikutnya</button>
+      </div>
+      <div id="noResult" class="text-center text-muted mt-3" style="display: none;">
+        <p>Tidak ada dokumen yang cocok dengan pencarian atau filter.</p>
+      </div>
+    </div>
+  </section> 
+  <footer id="kontak" class="text-white py-4">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <h5>Maps</h5>
+          <p><i class="bi bi-geo-alt"></i> <a href="https://maps.app.goo.gl/5L2J3BoVmfxUsxFm6" class="text-white" target="_blank">Jl. Dalem Wirawangsa No. 2, Mangunreja</a></p>
+        </div>
+        <div class="col-md-4">
+          <h5>Sosial Media</h5>
+          <a href="https://www.instagram.com/disdikbud_kabtsm" class="text-white" target="_blank">
+            <i class="bi bi-instagram"></i> @disdikbud_kabtsm
+          </a>
+        </div>
+        <div class="col-md-4 d-flex align-items-center justify-content-center text-center">
+          <p class="mb-0 w-100">&copy; 2025 Dinas Pendidikan Kabupaten Tasikmalaya</p>
+        </div>
+      </div>
+    </div>
+  </footer>   
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>  
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>  
+  <script src="script.js"></script>
+</body>
+</html>
