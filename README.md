@@ -1,7 +1,7 @@
 1. Instalasi Awal (Developer)  
-A. Siapkan Tools  
-Install XAMPP  
-Clone repo ini atau download ZIP lalu extract ke:  
+A. Siapkan Tools
+Install XAMPP
+Clone repo ini atau download ZIP lalu extract ke:
 C:\xampp\htdocs\
 
 B. Konfigurasi Google Drive API    
@@ -20,8 +20,8 @@ $folderId = 'ISI_DENGAN_FOLDER_ID_DRIVE';
 Catatan: Pastikan file dan folder di Google Drive Anda bersifat publik.
 
 C. Jalankan Server  
-Buka XAMPP → Start Apache
-Akses di browser:
+Buka XAMPP → Start Apache  
+Akses di browser: 
 http://localhost/jdih_kp/
 
 2. Cara Penggunaan (User)  
