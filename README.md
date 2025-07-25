@@ -8,14 +8,7 @@ B. Konfigurasi Google Drive API
 Buat project di Google Cloud Console   
 Aktifkan Google Drive API  
 Buat API Key  
-Salin API Key ke file config.php:  
-php
-Copy
-Edit
-<?php
-$apiKey = 'ISI_DENGAN_API_KEY_ANDA';
-$folderId = 'ISI_DENGAN_FOLDER_ID_DRIVE';
-?>
+Salin API Key ke file config.php
 
 Catatan: Pastikan file dan folder di Google Drive Anda bersifat publik.
 
