@@ -1,7 +1,7 @@
 1. Instalasi Awal (Developer)  
-A. Siapkan Tools
-Install XAMPP
-Clone repo ini atau download ZIP lalu extract ke:
+A. Siapkan Tools  
+Install XAMPP  
+Clone repo ini atau download ZIP lalu extract ke:  
 C:\xampp\htdocs\
 
 B. Konfigurasi Google Drive API    
