@@ -40,7 +40,7 @@ a:hover {
 
 .blur-navbar {
   background-color: rgba(0, 31, 63, 0.9);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(8px);
   transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
   z-index: 1030;
@@ -86,6 +86,7 @@ a:hover {
 footer {
   background-color: #001f3f;
   color: white;
+  border-radius: 0.5rem 0.5rem 0 0;
 }
 
 footer a {
@@ -95,6 +96,7 @@ footer a {
 
 footer a:hover {
   color: #001f3f;
+  text-decoration: underline;
 }
 
 html {
@@ -119,6 +121,19 @@ footer {
 
 .btn-custom-blue:hover {
   background-color: #7e9ecf;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.z-50 {
+  z-index: 9999;
+}
+
+.filename {
+  word-wrap: break-word;
+  white-space: normal;
 }
 
 @media (max-width: 767.98px) {
