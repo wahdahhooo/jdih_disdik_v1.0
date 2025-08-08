@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JDIH Disdikbud Kab. Tasikmalaya</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
@@ -29,16 +29,35 @@
   </nav>    
   <section class="hero-image text-white text-center">
     <div class="container">
-      <h1 class="fs-4 fw-normal">Jaringan Dokumentasi dan Informasi Hukum</h1>
+      <p class="fs-4 fw-normal">Jaringan Dokumentasi dan Informasi Hukum</p>
       <p class="display-5 fw-bold">Dinas Pendidikan dan Kebudayaan</p>
       <p class="display-5 fw-bold">Kabupaten Tasikmalaya</p>
     </div>
   </section>   
+  <section id="statistik" class="py-5">
+    <div class="container mb-4">
+      <h2 class="text-center mb-4"> Statistik Dokumen </h2>
+      <div class="row text-center">
+        <div class="col">
+          <h6>Hari Ini</h6>
+          <p id="statToday" class="fw-bold fs-5">0</p>
+        </div>
+        <div class="col">
+          <h6>Minggu Ini</h6>
+          <p id="statWeek" class="fw-bold fs-5">0</p>
+        </div>
+        <div class="col">
+          <h6>Bulan Ini</h6>
+          <p id="statMonth" class="fw-bold fs-5">0</p>
+        </div>
+      </div>
+    </div>
+  </section>
   <section id="filter" class="py-4 bg-light">
     <div class="container">
       <div class="row g-2 align-items-center">
-        <div class="col-md-4">
-          <input type="text" id="searchInput" class="form-control" placeholder="Cari dokumen..." />
+        <div class="col-md-12">
+          <input type="text" id="searchInput" class="form-control" placeholder="Cari dokumen disini" />
         </div>
         <div class="col-md-4">
           <select id="filterJenis" class="form-select">
@@ -60,6 +79,14 @@
             <option value="">Semua Tahun</option>
           </select>
         </div>
+        <div class="col-md-4">
+          <select id="filterWaktu" class="form-select">
+            <option value="all">Semua Waktu</option>
+            <option value="today">Hari ini</option>
+            <option value="thisWeek">Minggu Ini</option>
+            <option value="thisMonth">Bulan Ini</option>
+          </select>
+        </div>
       </div>
     </div>
   </section>  
@@ -67,14 +94,14 @@
     <div class="container">
       <h2 class="mb-4">Daftar Dokumen</h2>
       <div class="dokumen-wrapper p-3 rounded dokumen-card">
-        <div id="dokumenContainer">
-        </div>
+        <div id="dokumenContainer" class="row row-cols-1 row-cols-12 g-3"></div>
       </div>
-      <div class="pagination justify-content-center mt-4" style="gap: 10px;">
-        <button id="prevBtn" class="btn btn-custom-blue btn-sm">Sebelumnya</button>
-        <span id="pageInfo" class="align-self-center"></span>
-        <button id="nextBtn" class="btn btn-custom-blue btn-sm">Berikutnya</button>
-      </div>
+    </div>
+    <div class="pagination justify-content-center mt-4" style="gap: 10px;">
+      <button id="prevBtn" class="btn btn-custom-blue btn-sm">Sebelumnya</button>
+      <span id="pageInfo" class="align-self-center"></span>
+      <button id="nextBtn" class="btn btn-custom-blue btn-sm">Berikutnya</button>
+    </div>
       <div id="noResult" class="text-center text-muted mt-3" style="display: none;">
         <p>Tidak ada dokumen yang cocok dengan pencarian atau filter.</p>
       </div>
@@ -83,22 +110,31 @@
   <footer id="kontak" class="text-white py-4">
     <div class="container">
       <div class="row">
+        <div class="col-md-4 ">
+          <h5>Website</h5>
+          <a href="https://disdkbud.tasikmalayakab.go.id" class="text-white" target="_blank">
+            <p class="bi bi-globe"></i> disdikbud.tasikmalayakab.go.id
+          </a>
+        </div>
+          <div class="col-md-4 ">
+          <h5>Sosial Media</h5>
+          <a href="https://www.instagram.com/disdikbud_kabtsm" class="text-white" target="_blank">
+            <p class="bi bi-instagram"></i> @disdikbud_kabtsm
+          </a>
+        </div>
         <div class="col-md-4">
           <h5>Maps</h5>
           <p><i class="bi bi-geo-alt"></i> <a href="https://maps.app.goo.gl/5L2J3BoVmfxUsxFm6" class="text-white" target="_blank">Jl. Dalem Wirawangsa No. 2, Mangunreja</a></p>
         </div>
-        <div class="col-md-4">
-          <h5>Sosial Media</h5>
-          <a href="https://www.instagram.com/disdikbud_kabtsm" class="text-white" target="_blank">
-            <i class="bi bi-instagram"></i> @disdikbud_kabtsm
-          </a>
-        </div>
-        <div class="col-md-4 d-flex align-items-center justify-content-center text-center">
-          <p class="mb-0 w-100">&copy; 2025 Dinas Pendidikan Kabupaten Tasikmalaya</p>
+        <div class="text-center mt-4 small">
+          <p class="mb-0 w-100">
+            <span>&copy; 2025 Dinas Pendidikan dan Kebudayaan Kabupaten Tasikmalaya</span><br>
+            <span> Kerja Praktik Sekolah Tinggi Teknologi Cipasung </span>
+          </p>
         </div>
       </div>
     </div>
-  </footer>   
+  </footer>
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>  
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>  
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>  
