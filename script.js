@@ -1,7 +1,15 @@
 let allFiles = [];
+let searchTimeout;
 let previousFileIds = new Set();
 let currentPage = 1;
 const itemsPerPage = 10;
+
+function showLoading() {
+  document.getElementById('loadingIndicator').style.display = 'block';
+}
+function hideLoading() {
+  document.getElementById('loadingIndicator').style.display = 'none';
+}
 
 async function fetchDriveFiles() {
   const response = await fetch('drive.php');
@@ -9,188 +17,158 @@ async function fetchDriveFiles() {
   return data.files;
 }
 
+function updateDocumentStatistics(files) {
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  endOfWeek.setHours(23, 59, 59, 999);
+
+  const todayCount = files.filter(f => f.createdDate.toDateString() === now.toDateString()).length;
+  const weekCount = files.filter(f => f.createdDate >= startOfWeek && f.createdDate <= endOfWeek).length;
+  const monthCount = files.filter(f => f.createdDate.getMonth() === now.getMonth() && f.createdDate.getFullYear() === now.getFullYear()).length;
+  const allCount = files.length;
+
+  document.getElementById('statToday').textContent = todayCount;
+  document.getElementById('statWeek').textContent = weekCount;
+  document.getElementById('statMonth').textContent = monthCount;
+  document.getElementById('statAll').textContent = allCount;
+}
+
 async function renderDokumen() {
+  showLoading();
   const dokumenContainer = document.getElementById('dokumenContainer');
   const filterTahun = document.getElementById('filterTahun');
 
-  allFiles = await fetchDriveFiles();
-  allFiles = allFiles.filter(file => file.name.toLowerCase().endsWith('.pdf'));
-  const tahunSet = new Set();
+  try {
+    const fetchedFiles = await fetchDriveFiles();
+    allFiles = fetchedFiles.filter(file => file.name.toLowerCase().endsWith('.pdf'));
+    
+    const tahunSet = new Set();
+    allFiles = allFiles.map(file => {
+      
+      const tahunMatch = file.name.match(/(19|20)\d{2}/);
+      file.tahun = tahunMatch ? tahunMatch[0] : '';
+      file.displayName = file.name.replace(/\.pdf$/i, '');
+      file.createdDate = new Date(file.createdTime);
 
-  allFiles = allFiles.map(file => {
-    const tahunMatch = file.name.match(/(19|20)\d{2}/);
-    file.tahun = tahunMatch ? tahunMatch[0] : '';
-    file.displayName = file.name.replace(/\.pdf$/i, '');
+      const nameLower = file.name.toLowerCase();
+      if (nameLower.includes('perpu')) file.jenis = 'PERPU';
+      else if (nameLower.includes('perpres')) file.jenis = 'PERPRES';
+      else if (nameLower.includes('pp')) file.jenis = 'PP';
+      else if (nameLower.includes('uu')) file.jenis = 'Undang-Undang';
+      else if (nameLower.includes('perda')) file.jenis = 'PERDA';
+      else if (nameLower.includes('permendikbud')) file.jenis = 'PERMEN';
+      else if (nameLower.includes('pergub')) file.jenis = 'PERGUB';
+      else if (nameLower.includes('kepbup')) file.jenis = 'KEPBUP';
+      else if (nameLower.includes('edaran')) file.jenis = 'Edaran';
+      else file.jenis = 'Lainnya';
 
-    const nameLower = file.name.toLowerCase();
-    if (nameLower.includes('perpu')) file.jenis = 'PERPU';
-    else if (nameLower.includes('perpres')) file.jenis = 'PERPRES';
-    else if (nameLower.includes('pp')) file.jenis = 'PP';
-    else if (nameLower.includes('uu')) file.jenis = 'Undang-Undang';
-    else if (nameLower.includes('perda')) file.jenis = 'PERDA';
-    else if (nameLower.includes('permendikbud')) file.jenis = 'PERMEN';
-    else if (nameLower.includes('pergub')) file.jenis = 'PERGUB';
-    else if (nameLower.includes('kepbup')) file.jenis = 'KEPBUP';
-    else if (nameLower.includes('edaran')) file.jenis = 'Edaran';
-    else file.jenis = 'Lainnya';
+      if (file.tahun) tahunSet.add(file.tahun);
+      return file;
+    })
 
-    file.createdDate = new Date(file.createdTime);
+    allFiles.sort((a, b) => a.displayName.localeCompare(b.displayName));
 
-    if (file.tahun) tahunSet.add(file.tahun);
-    return file;
-  });
+    filterTahun.innerHTML = '<option value="">Semua Tahun</option>';
+    Array.from(tahunSet).sort().forEach(tahun => {
+      filterTahun.insertAdjacentHTML('beforeend', `<option value="${tahun}">${tahun}</option>`);
+    });
 
-  allFiles.sort((a, b) => a.displayName.localeCompare(b.displayName));
+    updateDocumentStatistics(allFiles);
 
-  filterTahun.innerHTML = '<option value="">Semua Tahun</option>';
-  Array.from(tahunSet).sort().forEach(tahun => {
-    const option = document.createElement('option');
-    option.value = tahun;
-    option.textContent = tahun;
-    filterTahun.appendChild(option);
-  });
-
-  const sortedFiles = [...allFiles].sort((a, b) => new Date(b.createdTime) - new Date(a.createdTime));
-  const latestFile = sortedFiles[0];
-  const storedLatestId = localStorage.getItem('latestFileId');
-
+    const latestFile = [...allFiles].sort((a, b) => b.createdDate - a.createdDate)[0];
+    const storedLatestId = localStorage.getItem('latestFileId');
     const hasVisitedBefore = localStorage.getItem('hasVisitedBefore');
 
-  if (latestFile && latestFile.id !== storedLatestId && hasVisitedBefore) {
-    localStorage.setItem('latestFileId', latestFile.id);
-    showNewDocumentNotification({
-      ...latestFile,
-      displayName: latestFile.name.replace(/\.pdf$/i, '')
-    });
+    if (latestFile && latestFile.id !== storedLatestId && hasVisitedBefore) {
+      localStorage.setItem('latestFileId', latestFile.id);
+      showNewDocumentNotification(latestFile);
+    }
+    localStorage.setItem('hasVisitedBefore', 'true');
+
+    applyFilter();
+  } catch (error) {
+    console.error('Gagal memuat dokumen:', error);
+  } finally {
+    hideLoading();
   }
-
-  localStorage.setItem('hasVisitedBefore', 'true'); 
-
-  updateDocumentStatistics(allFiles);
-  applyFilter();
-}
-
-function updateDocumentStatistics(files) {
-  const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
-  const thisWeekStart = new Date(today);
-  thisWeekStart.setDate(today.getDate() - 6);
-
-  const thisMonth = today.getMonth();
-  const thisYear = today.getFullYear();
-
-  let countToday = 0;
-  let countWeek = 0;
-  let countMonth = 0;
-
-  files.forEach(file => {
-    const fileDate = new Date(file.createdTime);
-    const fileDateStr = fileDate.toISOString().split('T')[0];
-    if (fileDateStr === todayStr) countToday++;
-    if (fileDate >= thisWeekStart && fileDate <= today) countWeek++;
-    if (fileDate.getMonth() === thisMonth && fileDate.getFullYear() === thisYear) countMonth++;
-  });
-
-  document.getElementById('statToday').textContent = countToday;
-  document.getElementById('statWeek').textContent = countWeek;
-  document.getElementById('statMonth').textContent = countMonth;
 }
 
 function applyFilter() {
-  const keyword = document.getElementById('searchInput').value.toLowerCase();
-  const jenis = document.getElementById('filterJenis').value;
-  const tahun = document.getElementById('filterTahun').value;
-  const waktu = document.getElementById('filterWaktu').value;
-  const dokumenContainer = document.getElementById('dokumenContainer');
-  const noResult = document.getElementById('noResult');
+  showLoading();
+  setTimeout(() => { 
+    const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+    const jenis = document.getElementById('filterJenis').value;
+    const tahun = document.getElementById('filterTahun').value;
+    const waktu = document.getElementById('filterWaktu').value;
+    const dokumenContainer = document.getElementById('dokumenContainer');
+    const noResult = document.getElementById('noResult');
 
-  let filtered = allFiles.filter(file => {
-    const name = file.displayName.toLowerCase();
-    const matchKeyword = !keyword || name.includes(keyword);
-    const matchJenis = !jenis || file.jenis === jenis;
-    const matchTahun = !tahun || file.tahun === tahun;
-
-    let matchWaktu = true;
     const now = new Date();
-    const fileDate = file.createdDate;
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
 
-    if (waktu === 'today') {
-      matchWaktu = fileDate.toDateString() === now.toDateString();
-    } else if (waktu === 'thisWeek') {
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay());
-      startOfWeek.setHours(0, 0, 0, 0);
+    const filtered = allFiles.filter(file => {
+      if (keyword && !file.displayName.toLowerCase().includes(keyword)) return false;
+      if (jenis && file.jenis !== jenis) return false;
+      if (tahun && file.tahun !== tahun) return false;
 
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
-      endOfWeek.setHours(23, 59, 59, 999);
+      if (waktu === 'today') {
+        return file.createdDate.toDateString() === now.toDateString();
+      } else if (waktu === 'thisWeek') {
+        return file.createdDate >= startOfWeek && file.createdDate <= endOfWeek;
+      } else if (waktu === 'thisMonth') {
+        return file.createdDate.getMonth() === now.getMonth() &&
+              file.createdDate.getFullYear() === now.getFullYear();
+      }
+      return true;
+    });
 
-      matchWaktu = fileDate >= startOfWeek && fileDate <= endOfWeek;
-    } else if (waktu === 'thisMonth') {
-      matchWaktu = fileDate.getMonth() === now.getMonth() && fileDate.getFullYear() === now.getFullYear();
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    if (currentPage > totalPages) currentPage = 1;
+
+    const start = (currentPage - 1) * itemsPerPage;
+    const visibleItems = filtered.slice(start, start + itemsPerPage);
+
+    dokumenContainer.innerHTML = '';
+    if (!visibleItems.length) {
+      noResult.style.display = 'block';
+    } else {
+      noResult.style.display = 'none';
+      visibleItems.forEach(file => {
+        const fileDate = file.createdDate;
+        let waktuTag = '';
+        if (fileDate.toDateString() === now.toDateString()) waktuTag = 'Hari Ini';
+        else if (fileDate >= startOfWeek && fileDate <= endOfWeek) waktuTag = 'Minggu Ini';
+        else if (fileDate.getMonth() === now.getMonth() && fileDate.getFullYear() === now.getFullYear()) waktuTag = 'Bulan Ini';
+
+        dokumenContainer.insertAdjacentHTML('beforeend', `
+          <div class="col dokumen-item mb-3" data-id="${file.id}">
+            <div class="p-3 rounded dokumen-card">
+              <h5><a href="${file.webViewLink}" target="_blank" class="dokumen-link">${file.displayName}</a></h5>
+              <p class="mb-0"><strong>Jenis:</strong> ${file.jenis} | <strong>Tahun:</strong> ${file.tahun || 'Tidak diketahui'}</p>
+              <p class="text-muted mb-1"><small>Diunggah: ${fileDate.toLocaleString('id-ID')}</small></p>
+              ${waktuTag ? `<span class="badge bg-info text-dark">${waktuTag}</span>` : ''}
+            </div>
+          </div>
+        `);
+      });
     }
 
-    return matchKeyword && matchJenis && matchTahun && matchWaktu;
-  });
-
-  filtered.sort((a, b) => a.displayName.localeCompare(b.displayName));
-
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
-  if (currentPage > totalPages) currentPage = 1;
-
-  const start = (currentPage - 1) * itemsPerPage;
-  const visibleItems = filtered.slice(start, start + itemsPerPage);
-
-  dokumenContainer.innerHTML = '';
-  if (visibleItems.length === 0) {
-    noResult.style.display = 'block';
-  } else {
-    noResult.style.display = 'none';
-    visibleItems.forEach(file => {
-      const fileDate = file.createdDate;
-      const now = new Date();
-
-      let waktuTag = '';
-      if (fileDate.toDateString() === now.toDateString()) {
-        waktuTag = 'Hari Ini';
-      } else {
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay());
-        startOfWeek.setHours(0, 0, 0, 0);
-
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6);
-        endOfWeek.setHours(23, 59, 59, 999);
-
-        if (fileDate >= startOfWeek && fileDate <= endOfWeek) {
-          waktuTag = 'Minggu Ini';
-        } else if (
-          fileDate.getMonth() === now.getMonth() &&
-          fileDate.getFullYear() === now.getFullYear()
-        ) {
-          waktuTag = 'Bulan Ini';
-        }
-      }
-
-      const item = document.createElement('div');
-      item.className = 'col dokumen-item mb-3';
-      item.setAttribute('data-id', file.id);
-      item.innerHTML = `
-        <div class="p-3 rounded dokumen-card">
-          <h5><a href="${file.webViewLink}" target="_blank" class="dokumen-link">${file.displayName}</a></h5>
-          <p class="mb-0"><strong>Jenis:</strong> ${file.jenis} | <strong>Tahun:</strong> ${file.tahun || 'Tidak diketahui'}</p>
-          <p class="text-muted mb-1"><small>Diunggah: ${fileDate.toLocaleString('id-ID')}</small></p>
-          ${waktuTag ? `<span class="badge bg-info text-dark">${waktuTag}</span>` : ''}
-        </div>
-      `;
-      dokumenContainer.appendChild(item);
-    });
-  }
-
-  renderPagination(filtered.length, totalPages);
+    renderPagination(filtered.length, totalPages);
+    hideLoading();
+  }, 300);
 }
 
-function renderPagination(totalItems, totalPages) {
+function renderPagination(totalItems, totalPages) { 
   const container = document.querySelector('.pagination');
   const pageInfo = document.getElementById('pageInfo');
   const prevBtn = document.getElementById('prevBtn');
@@ -222,7 +200,7 @@ function renderPagination(totalItems, totalPages) {
   };
 }
 
-function showNewDocumentNotification(file) {
+function showNewDocumentNotification(file) { 
   const notif = document.createElement('div');
   notif.className = 'fixed bottom-4 end-4 text-white p-3 rounded shadow-lg z-50';
   notif.style.backgroundColor = '#001f3f';
@@ -231,7 +209,6 @@ function showNewDocumentNotification(file) {
   notif.style.bottom = '20px';
   notif.style.right = '20px';
   notif.style.zIndex = '9999';
-
   notif.innerHTML = `
     <strong>Dokumen Baru Diunggah!</strong><br>
     <span class="filename">${file.displayName}</span><br>
@@ -259,26 +236,23 @@ function showNewDocumentNotification(file) {
 
   setTimeout(() => notif.remove(), 100000);
 }
+
 setInterval(() => {
   renderDokumen();
 }, 60000);
 
 document.addEventListener('DOMContentLoaded', () => {
   renderDokumen();
-  
-  document.getElementById('filterJenis').addEventListener('change', () => {
-    currentPage = 1;
-    applyFilter();
+
+  document.getElementById('searchInput').addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      currentPage = 1;
+      applyFilter();
+    }, 500);
   });
 
-  document.getElementById('filterTahun').addEventListener('change', () => {
-    currentPage = 1;
-    applyFilter();
-  });
-
-  document.getElementById('filterWaktu').addEventListener('change', () => {
-    currentPage = 1;
-    applyFilter();
-  });
-
+  document.getElementById('filterJenis').addEventListener('change', () => { currentPage = 1; applyFilter(); });
+  document.getElementById('filterTahun').addEventListener('change', () => { currentPage = 1; applyFilter(); });
+  document.getElementById('filterWaktu').addEventListener('change', () => { currentPage = 1; applyFilter(); });
 });
