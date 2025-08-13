@@ -4,14 +4,9 @@ header("Content-Type: application/json");
 
 include("config.php");
 
-// Query untuk folder tertentu
 $q = "'" . FOLDER_ID . "' in parents and trashed=false";
 $q = urlencode($q);
-
-// Endpoint Google Drive API
 $url = "https://www.googleapis.com/drive/v3/files?q={$q}&fields=files(id,name,webViewLink,createdTime),nextPageToken&pageSize=1000&key=" . API_KEY;
-
-// Ambil data semua halaman
 $allFiles = [];
 $pageToken = null;
 
@@ -31,7 +26,6 @@ do {
     $pageToken = isset($data['nextPageToken']) ? $data['nextPageToken'] : null;
 } while ($pageToken);
 
-// Output sebagai JSON
 echo json_encode([
     "files" => $allFiles,
     "total" => count($allFiles)
