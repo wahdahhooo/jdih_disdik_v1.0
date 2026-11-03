@@ -6,7 +6,7 @@ include("config.php");
 
 $q = "'" . FOLDER_ID . "' in parents and trashed=false";
 $q = urlencode($q);
-$url = "https://www.googleapis.com/drive/v3/files?q={$q}&fields=files(id,name,webViewLink,createdTime),nextPageToken&pageSize=1000&key=" . API_KEY;
+$url = "https" . API_KEY;
 $allFiles = [];
 $pageToken = null;
 
